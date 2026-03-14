@@ -1,113 +1,77 @@
 package com.example.studyroom_reservation_recommendation.controller;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import com.example.studyroom_reservation_recommendation.entity.Reservation;
+import com.example.studyroom_reservation_recommendation.repository.ReservationRepository;
+import com.example.studyroom_reservation_recommendation.service.ReservationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/reserve") // 공통 URL 설정
+public class ReservationController {
+    private final ReservationService reservationService;
 
-import studyroom.model.Reservation;
-import studyroom.model.ReservationDAO;
+    // 메인 목록 조회 및 검색 (GET 요청)
+    // 기존 action=main 과 action=search 를 하나로 합침
+    @GetMapping
+    public String mainPage(@RequestParam(required = false) String keyword,
+                           @RequestParam(required = false) String action,
+                           Model model) {
+        List<Reservation> list;
 
-@WebServlet("/reserve")
-public class ReservationController extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    private ReservationDAO dao = new ReservationDAO();
+        // 검색어가 있으면 검색, 없으면 전체 조회
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            list = reservationService.searchReservations(keyword.trim());
+            model.addAttribute("searchKeyword", keyword); // 검색어 유지
+        } else {
+            list = reservationService.getAllReservations();
+        }
+        model.addAttribute("list", list);
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doProcess(request, response);
+        // application.properties에 설정한 prefix/suffix 덕분에 "main"만 리턴해도 /WEB-INF/jsp/main.jsp로 이동함
+        return "main";
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doProcess(request, response);
+    // 예약 등록 (POST 요청, form의 action=insert 일 때만 실행)
+    // Spring: JSP의 input name과 Reservation 객체의 필드명이 같으면 알아서 데이터(학번, 이름 등)를 자동으로 넣어줌
+    @PostMapping(params = "action=insert")
+    public String insertReservation(@ModelAttribute Reservation reservation, Model model) {
+        // 서비스 단에서 저장 및 중복 체크 시도
+        boolean isSuccess = reservationService.registerReservation(reservation);
+
+        if (!isSuccess) {
+            // 중복일 경우 에러 메시지와 사용자가 입력했던 데이터를 다시 모델에 담아 화면으로 돌려보냄
+            model.addAttribute("errorMsg", "해당 날짜와 시간에는 이미 예약이 존재합니다.");
+
+            // 입력 데이터 유지 (기존처럼 request.setAttribute("name", name) 노가다 할 필요 없이 객체째로 던짐)
+            model.addAttribute("name", reservation.getName());
+            model.addAttribute("student_id", reservation.getStudentId());
+            model.addAttribute("date", reservation.getDate());
+            model.addAttribute("time_slot", reservation.getTimeSlot());
+            model.addAttribute("people", reservation.getPeople());
+            model.addAttribute("purpose", reservation.getPurpose());
+
+            // 목록이 사라지지 않도록 다시 조회해서 담아줌
+            model.addAttribute("list", reservationService.getAllReservations());
+
+            return "main"; // 포워딩 (redirect 아님)
+        }
+        // 성공 시 리다이렉트
+        return "redirect:/reserve?success=true";
     }
 
-    protected void doProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("utf-8");
-        String action = request.getParameter("action");
-
-        // 목록 전체 보기 (기본값)
-        if (action == null || action.equals("main")) {
-            List<Reservation> list = dao.getAll();
-            request.setAttribute("list", list); 
-            
-            RequestDispatcher rd = request.getRequestDispatcher("/main.jsp");
-            rd.forward(request, response);
+    // 선택 삭제 (POST 요청, form의 action=delete 일 때만 실행)
+    @PostMapping(params = "action=delete")
+    public String deleteReservation(@RequestParam(value = "deleteIds", required = false) List<Long> deleteIds) {
+        if (deleteIds != null && !deleteIds.isEmpty()) {
+            reservationService.deleteReservations(deleteIds);
         }
-        
-        // 예약 등록 요청
-        else if ("insert".equals(action)) {
-            String name = request.getParameter("name");
-            String studentId = request.getParameter("student_id");
-            String date = request.getParameter("date");
-            String timeSlot = request.getParameter("time_slot");
-            
-            // 중복 예약 확인
-            if (dao.isBooked(date, timeSlot)) {
-                // 1. 에러 메시지 설정
-                request.setAttribute("errorMsg", "해당 날짜와 시간에는 이미 예약이 존재합니다.");
-                
-                // 2. 입력했던 데이터 유지 (사용자가 다시 치지 않게)
-                request.setAttribute("name", name);
-                request.setAttribute("student_id", studentId);
-                request.setAttribute("date", date);
-                request.setAttribute("time_slot", timeSlot);
-                request.setAttribute("people", request.getParameter("people"));
-                request.setAttribute("purpose", request.getParameter("purpose"));
-                
-                // 3. 우측 목록 데이터도 다시 조회해서 같이 보냄 (안 그러면 목록이 사라짐)
-                List<Reservation> list = dao.getAll();
-                request.setAttribute("list", list);
-                
-                // 4. 메인 화면으로 포워딩 (Redirect 아님!)
-                RequestDispatcher rd = request.getRequestDispatcher("/main.jsp");
-                rd.forward(request, response);
-                return; 
-            }
-            
-            int people = 0;
-            try {
-                people = Integer.parseInt(request.getParameter("people"));
-            } catch (NumberFormatException e) { e.printStackTrace(); }
-            
-            String purpose = request.getParameter("purpose");
-
-            Reservation r = new Reservation(name, studentId, date, timeSlot, people, purpose);
-            dao.insert(r);
-
-            response.sendRedirect(request.getContextPath() + "/reserve?action=main&success=true");
-        }
-        
-        // 검색 요청
-        else if ("search".equals(action)) {
-            String keyword = request.getParameter("keyword");
-            List<Reservation> list;
-            
-            if(keyword == null || keyword.trim().isEmpty()) {
-                 list = dao.getAll(); // 검색어 없으면 전체 조회
-            } else {
-                 list = dao.search(keyword.trim()); // 검색 실행
-            }
-            
-            request.setAttribute("list", list);
-            request.setAttribute("searchKeyword", keyword); // 검색어 유지용
-            RequestDispatcher rd = request.getRequestDispatcher("/main.jsp");
-            rd.forward(request, response);
-        }
-
-        // 삭제 요청 
-        else if ("delete".equals(action)) {
-            String[] deleteIds = request.getParameterValues("deleteIds"); // 체크박스 값들
-            if (deleteIds != null) {
-                dao.delete(deleteIds);
-            }
-            // 삭제 후 목록으로 리다이렉트
-            response.sendRedirect(request.getContextPath() + "/reserve?action=main");
-        }
+        return "redirect:/reserve";
     }
 }
