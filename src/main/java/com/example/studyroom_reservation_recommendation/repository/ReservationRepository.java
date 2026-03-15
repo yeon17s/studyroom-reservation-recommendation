@@ -14,4 +14,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     
     // 검색
     List<Reservation> findByNameContainingOrStudentIdContainingOrderByDateAscTimeSlotAsc(String name, String studentId);
+
+    List<Reservation> findByDate(String date);
 }
