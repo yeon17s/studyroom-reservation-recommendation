@@ -118,17 +118,17 @@ public class RecommendationService {
 
         // 5. 점수 기준 내림차순 정렬 후 상위 2개만 추출
         List<TimeSlotScore> topScores = scores.stream()
-                .sorted(Comparator.comparingInt(TimeSlotScore::getScore).reversed())
+                .sorted(Comparator.comparingInt(TimeSlotScore::score).reversed())
                 .limit(2)
                 .toList(); // 기존 방식: .collect(Collectors.toList());
 
         // 6. 결과 DTO 리스트로 변환해 반환
         return topScores.stream()
                 .map(slotScore -> RecommendationResult.builder()
-                        .recommendedTime(slotScore.getSlot())
-                        .score(slotScore.getScore())
+                        .recommendedTime(slotScore.slot())
+                        .score(slotScore.score())
                         // 각각의 슬롯에 맞는 reason을 생성해서 바로 넣어줌
-                        .reason(generateReason(slotScore.getSlot(), congestionMap.getOrDefault(slotScore.getSlot(), 0L), purpose))
+                        .reason(generateReason(slotScore.slot(), congestionMap.getOrDefault(slotScore.getSlot(), 0L), purpose))
                         .build())
                 .collect(Collectors.toList());
     }
