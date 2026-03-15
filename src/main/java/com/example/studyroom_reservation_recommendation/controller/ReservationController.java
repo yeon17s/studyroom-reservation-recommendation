@@ -49,7 +49,7 @@ public class ReservationController {
             // 중복일 경우 에러 메시지와 사용자가 입력했던 데이터를 다시 모델에 담아 화면으로 돌려보냄
             model.addAttribute("errorMsg", "해당 날짜와 시간에는 이미 예약이 존재합니다.");
 
-            // 입력 데이터 유지 (기존처럼 request.setAttribute("name", name) 노가다 할 필요 없이 객체째로 던짐)
+            // 입력 데이터 유지
             model.addAttribute("name", reservation.getName());
             model.addAttribute("student_id", reservation.getStudentId());
             model.addAttribute("date", reservation.getDate());

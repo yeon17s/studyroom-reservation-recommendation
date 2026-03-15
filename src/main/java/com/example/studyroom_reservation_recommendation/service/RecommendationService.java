@@ -128,7 +128,7 @@ public class RecommendationService {
                         .recommendedTime(slotScore.slot())
                         .score(slotScore.score())
                         // 각각의 슬롯에 맞는 reason을 생성해서 바로 넣어줌
-                        .reason(generateReason(slotScore.slot(), congestionMap.getOrDefault(slotScore.getSlot(), 0L), purpose))
+                        .reason(generateReason(slotScore.slot(), congestionMap.getOrDefault(slotScore.slot(), 0L), purpose))
                         .build())
                 .collect(Collectors.toList());
     }
