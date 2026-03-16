@@ -48,6 +48,39 @@ body {
 }
 
 
+.recommend-section {
+    margin: 15px 0;
+    width: 100%;
+}
+.recommend-btn {
+    width: 100%;
+    padding: 10px;
+    font-weight: bold;
+    color: white;
+    background-color: #28a745; /* 초록색 */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.2s;
+    display: block;
+}
+.recommend-btn:hover {
+    background-color: #218838; /* 마우스 올렸을 때 조금 더 진한 초록 */
+}
+#recommend-result {
+    margin-bottom: 10px;
+    font-size: 14px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    line-height: 1.6;
+    color: #333;
+    min-height: 50px; /* 내용이 없을 때도 최소 높이 유지 */
+}
+
+
 #reservation-form {
     width: 100%;
     max-width: 450px;

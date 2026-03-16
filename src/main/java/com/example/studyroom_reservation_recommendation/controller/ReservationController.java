@@ -41,29 +41,20 @@ public class ReservationController {
     // 예약 등록 (POST 요청, form의 action=insert 일 때만 실행)
     // Spring: JSP의 input name과 Reservation 객체의 필드명이 같으면 알아서 데이터(학번, 이름 등)를 자동으로 넣어줌
     @PostMapping(params = "action=insert")
-    public String insertReservation(@ModelAttribute Reservation reservation, Model model) {
-        // 서비스 단에서 저장 및 중복 체크 시도
-        boolean isSuccess = reservationService.registerReservation(reservation);
+    public String insertReservation(@ModelAttribute Reservation reservation, RedirectAttributes redirectAttributes) {
+        try {
+            reservationService.registerReservation(reservation);
+            return "redirect:/reserve?success=true";
+        } catch (Exception e) {
+            // 중복 예약이나 기타 에러 발생 시
+            // 1. 에러 메시지 전달
+            redirectAttributes.addFlashAttribute("errorMsg", "이미 해당 날짜와 시간에 예약이 존재합니다. 다른 시간을 선택해 주세요.");
 
-        if (!isSuccess) {
-            // 중복일 경우 에러 메시지와 사용자가 입력했던 데이터를 다시 모델에 담아 화면으로 돌려보냄
-            model.addAttribute("errorMsg", "해당 날짜와 시간에는 이미 예약이 존재합니다.");
+            // 2. 입력했던 데이터들을 다시 돌려보내서 사용자가 다시 치지 않게 함
+            redirectAttributes.addFlashAttribute("prevData", reservation);
 
-            // 입력 데이터 유지
-            model.addAttribute("name", reservation.getName());
-            model.addAttribute("student_id", reservation.getStudentId());
-            model.addAttribute("date", reservation.getDate());
-            model.addAttribute("time_slot", reservation.getTimeSlot());
-            model.addAttribute("people", reservation.getPeople());
-            model.addAttribute("purpose", reservation.getPurpose());
-
-            // 목록이 사라지지 않도록 다시 조회해서 담아줌
-            model.addAttribute("list", reservationService.getAllReservations());
-
-            return "main"; // 포워딩 (redirect 아님)
+            return "redirect:/reserve"; // 다시 입력 폼으로 리다이렉트
         }
-        // 성공 시 리다이렉트
-        return "redirect:/reserve?success=true";
     }
 
     // 선택 삭제 (POST 요청, form의 action=delete 일 때만 실행)
