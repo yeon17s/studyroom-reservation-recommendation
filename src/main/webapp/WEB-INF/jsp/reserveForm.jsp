@@ -91,9 +91,68 @@
         </div>
         <textarea id="purpose" name="purpose" class="input-box" rows="3" placeholder="스터디 목적을 입력하세요"><%=prevPurpose%></textarea>
     </div>
+
+    <div class="recommend-section" style="margin-top: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
+        <button type="button" onclick="getRecommendation()" style="width: 100%; padding: 10px; font-weight: bold; color: white; background-color: #28a745; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 10px;">
+            ✨ AI 맞춤형 시간대 추천받기
+        </button>
+        <div id="recommend-result" style="font-size: 14px; line-height: 1.6; color: #333;">
+            </div>
+    </div>
 </form>
 
 <div class="button-group">
     <button type="button" class="cancel-button" onclick="location.href='<%= request.getContextPath() %>/reserve?action=main'">취소</button>
     <button type="submit" form="reservation-form" class="submit-button">예약 등록</button>
 </div>
+
+<script>
+async function getRecommendation() {
+    // 1. 화면에 입력된 날짜와 목적 데이터 가져오기
+    const date = document.getElementById('date').value;
+    const purpose = document.getElementById('purpose').value;
+    const resultDiv = document.getElementById('recommend-result');
+
+    // 날짜는 필수 값이므로 체크
+    if (!date) {
+        alert("추천을 받으려면 먼저 날짜를 선택해주세요!");
+        return;
+    }
+
+    // 통신 중일 때 보여줄 로딩 메시지
+    resultDiv.innerHTML = "<span style='color: #666;'>추천 알고리즘 분석 중... ⏳</span>";
+
+    try {
+        // 2. 백엔드 API 호출 (GET 방식) - encodeURIComponent로 한글 목적 깨짐 방지
+        const response = await fetch(`/api/recommend?date=${date}&purpose=${encodeURIComponent(purpose)}`);
+
+        if (!response.ok) {
+            throw new Error("API 통신 에러 발생");
+        }
+
+        // 3. JSON 데이터 파싱
+        const data = await response.json();
+
+        // 4. 화면에 그릴 HTML 생성
+        let html = `<strong>💡 AI 분석 결과 (Top 2)</strong><ul style="margin-top:10px; padding-left:20px;">`;
+
+        data.forEach((item, index) => {
+            html += `<li style="margin-bottom:12px;">
+                        <span style="color:#007bff; font-weight:bold; font-size: 15px;">
+                            ${index + 1}지망: ${item.recommendedTime}
+                        </span>
+                        <span style="color:#888; font-size: 12px;">(적합도 점수: ${item.score}점)</span><br>
+                        <span style="color:#444;">${item.reason}</span>
+                     </li>`;
+        });
+        html += `</ul>`;
+
+        // 5. 결과 영역에 삽입
+        resultDiv.innerHTML = html;
+
+    } catch (error) {
+        console.error("추천 로드 실패:", error);
+        resultDiv.innerHTML = "<span style='color:red;'>추천 정보를 불러오는 중 서버 오류가 발생했습니다.</span>";
+    }
+}
+</script>

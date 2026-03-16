@@ -23,6 +23,11 @@ public class RecommendationApiController {
             @RequestParam String date,
             @RequestParam(required = false) String purpose) {
 
+        // 날짜가 안 넘어왔을 때 직접 예외를 던짐
+        if (date == null || date.trim().isEmpty()) {
+            throw new IllegalArgumentException("날짜(date) 파라미터는 필수입니다.");
+        }
+
         // 1. 추천 알고리즘 호출
         List<RecommendationResult> results = recommendationService.recommendTimeSlot(date, purpose);
 
