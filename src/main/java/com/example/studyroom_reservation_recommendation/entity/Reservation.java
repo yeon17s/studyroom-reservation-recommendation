@@ -6,7 +6,15 @@ import jakarta.validation.constraints.Min;
 import lombok.*;
 
 @Entity
-@Table(name = "reservation") // 매핑할 DB 테이블 이름
+@Table(  // 매핑할 DB 테이블 이름, 날짜와 시간대 조합은 무조건 유일해야 한다고 DB에 선언
+        name = "reservation",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_date_time_slot",
+                        columnNames = {"date", "time_slot"}
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor // 기본 생성자 자동 생성
@@ -44,19 +52,4 @@ public class Reservation {
         this.people = people;
         this.purpose = purpose;
     }
-
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getStudentId() { return studentId; }
-    public void setStudentId(String studentId) { this.studentId = studentId; }
-    public String getDate() { return date; }
-    public void setDate(String date) { this.date = date; }
-    public String getTimeSlot() { return timeSlot; }
-    public void setTimeSlot(String timeSlot) { this.timeSlot = timeSlot; }
-    public int getPeople() { return people; }
-    public void setPeople(int people) { this.people = people; }
-    public String getPurpose() { return purpose; }
-    public void setPurpose(String purpose) { this.purpose = purpose; }
 }

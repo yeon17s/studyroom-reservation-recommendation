@@ -4,32 +4,33 @@ import com.example.studyroom_reservation_recommendation.entity.Reservation;
 import com.example.studyroom_reservation_recommendation.repository.ReservationRepository;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service // 서비스 클래스
 @RequiredArgsConstructor // final이 붙은 필드의 생성자를 롬복이 자동으로 만들어줌 (의존성 주입)
 @Transactional(readOnly = true) // 기본적으로 데이터 변경 없는 읽기 전용으로 설정 (성능 최적화)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
 
-    // 예약 등록 (기존 insert 대체)
+    // 예약 등록 (기존 insert 대체, 동시성 제어 적용)
     @Transactional
     public boolean registerReservation(Reservation reservation) {
-        // 중복 예약 체크 로직
-        boolean isDuplicate = reservationRepository.existsByDateAndTimeSlot(
-                reservation.getDate(),
-                reservation.getTimeSlot()
-        );
-        if (isDuplicate) {
-            return false; // 중복이면 저장 안 하고 false 반환
+        try {
+            // 1. 정상적인 상황이거나 동시 접속 중 1등으로 도착했을 때
+            reservationRepository.save(reservation);
+            return true; // 저장되고 true 반환
+        } catch (DataIntegrityViolationException e) {
+            // 2. 동시 접속 중 2등으로 도착했거나 이미 예약이 있는데 억지로 시도했을 때
+            log.warn("예약 중복 발생 (DB 방어): {} - {}", reservation.getDate(), reservation.getTimeSlot());
+            return false; // 에러로 저장하지 못해 false 반환, 컨트롤러가 화면에 에러 메시지 띄움
         }
-        // 중복이 아니면 저장 (INSERT 쿼리 자동 실행)
-        reservationRepository.save(reservation);
-        return true;
     }
 
     // 전체 목록 조회 (기존 getAll 대체)
