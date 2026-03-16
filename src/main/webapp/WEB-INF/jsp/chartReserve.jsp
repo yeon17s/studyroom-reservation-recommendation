@@ -1,7 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*" %>
 <%@ page import="java.time.LocalDate" %>
-<%@ page import="studyroom.model.Reservation" %>
+<%@ page import="com.example.studyroom_reservation_recommendation.entity.Reservation" %>
 <%
     // Controller에서 넘겨준 리스트 가져오기
     List<Reservation> list = (List<Reservation>) request.getAttribute("list");

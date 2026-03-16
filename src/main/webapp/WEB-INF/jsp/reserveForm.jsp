@@ -113,7 +113,7 @@ async function getRecommendation() {
     const purpose = document.getElementById('purpose').value;
     const resultDiv = document.getElementById('recommend-result');
 
-    // 날짜는 필수 값이므로 체크
+    // 날짜는 필수 값이므로 체크!
     if (!date) {
         alert("추천을 받으려면 먼저 날짜를 선택해주세요!");
         return;
@@ -124,7 +124,8 @@ async function getRecommendation() {
 
     try {
         // 2. 백엔드 API 호출 (GET 방식) - encodeURIComponent로 한글 목적 깨짐 방지
-        const response = await fetch(`/api/recommend?date=${date}&purpose=${encodeURIComponent(purpose)}`);
+        // JSP가 해석하지 못하게 $ 앞에 역슬래시(\) 추가
+        const response = await fetch(`/api/recommend?date=\${date}&purpose=\${encodeURIComponent(purpose)}`);
 
         if (!response.ok) {
             throw new Error("API 통신 에러 발생");
@@ -137,12 +138,13 @@ async function getRecommendation() {
         let html = `<strong>💡 AI 분석 결과 (Top 2)</strong><ul style="margin-top:10px; padding-left:20px;">`;
 
         data.forEach((item, index) => {
+            // $ 앞에 전부 역슬래시(\) 추가
             html += `<li style="margin-bottom:12px;">
                         <span style="color:#007bff; font-weight:bold; font-size: 15px;">
-                            ${index + 1}지망: ${item.recommendedTime}
+                            \${index + 1}지망: \${item.recommendedTime}
                         </span>
-                        <span style="color:#888; font-size: 12px;">(적합도 점수: ${item.score}점)</span><br>
-                        <span style="color:#444;">${item.reason}</span>
+                        <span style="color:#888; font-size: 12px;">(적합도 점수: \${item.score}점)</span><br>
+                        <span style="color:#444;">\${item.reason}</span>
                      </li>`;
         });
         html += `</ul>`;

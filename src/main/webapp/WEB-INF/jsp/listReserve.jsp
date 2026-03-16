@@ -3,7 +3,7 @@
 <%@ page import="java.util.Locale" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.TextStyle" %>
-<%@ page import="studyroom.model.Reservation" %>
+<%@ page import="com.example.studyroom_reservation_recommendation.entity.Reservation" %>
 <%
     List<Reservation> list = (List<Reservation>) request.getAttribute("list");
     String keyword = (String) request.getAttribute("searchKeyword");
