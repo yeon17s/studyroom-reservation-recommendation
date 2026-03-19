@@ -35,7 +35,7 @@ public class ReservationService {
 
     // 전체 목록 조회 (기존 getAll 대체)
     public List<Reservation> getAllReservations() {
-        return reservationRepository.findAllOrderByDateAscTimeSlotAsc();
+        return reservationRepository.findAllByOrderByDateAscTimeSlotAsc();
     }
 
     // 학번으로 개인 목록 조회
