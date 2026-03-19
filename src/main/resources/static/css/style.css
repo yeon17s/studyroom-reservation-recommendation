@@ -169,7 +169,6 @@ body {
     width: 100%;
     display: flex;
     justify-content: center;
-    padding: 20px 0;
 }
 .auth-box {
     text-align: center;

@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.example.studyroom_reservation_recommendation.entity.Reservation" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <%
     // 성공 메시지 확인 (URL 파라미터에서 가져옴)
@@ -42,7 +43,13 @@
             <label for="name" class="input-label">이름</label>
             <div id="name-error" class="error-message"></div>
         </div>
-        <input type="text" id="name" name="name" class="input-box" placeholder="예약자 이름" value="<%=prevName%>">
+        <sec:authorize access="isAuthenticated()">
+            <input type="text" id="name" name="name" class="input-box"
+                value="<%=prevName%>" placeholder="예약자 이름을 입력하세요">
+        </sec:authorize>
+        <sec:authorize access="isAnonymous()">
+            <input type="text" id="name" name="name" class="input-box" placeholder="로그인이 필요합니다" disabled>
+        </sec:authorize>
     </div>
 
     <div class="form-group">
@@ -50,7 +57,13 @@
             <label for="student_id" class="input-label">학번</label>
             <div id="student-id-error" class="error-message"></div>
         </div>
-        <input type="text" id="student_id" name="studentId" class="input-box" placeholder="학번 (예: 202512345)" value="<%=prevStudentId%>">
+        <sec:authorize access="isAuthenticated()">
+            <input type="text" id="student_id" name="studentId" class="input-box" placeholder="학번 (예: 202512345)"
+                value="<sec:authentication property='principal.username'/>" readonly>
+        </sec:authorize>
+        <sec:authorize access="isAnonymous()">
+            <input type="text" id="student_id" name="studentId" class="input-box" placeholder="로그인이 필요합니다." disabled>
+        </sec:authorize>
     </div>
 
     <div class="form-group">
@@ -103,10 +116,17 @@
     </div>
 </form>
 
-<div class="button-group">
-    <button type="button" class="cancel-button" onclick="location.href='<%= request.getContextPath() %>/reserve?action=main'">취소</button>
-    <button type="submit" form="reservation-form" class="submit-button">예약 등록</button>
-</div>
+<sec:authorize access="isAuthenticated()">
+    <div class="button-group">
+        <button type="button" class="cancel-button" onclick="location.href='<%= request.getContextPath() %>/reserve'">취소</button>
+        <button type="submit" form="reservation-form" class="submit-button">예약 등록</button>
+    </div>
+</sec:authorize>
+<sec:authorize access="isAnonymous()">
+    <div id="no-login-msg" class="login-error-message">
+        로그인 후 예약 가능합니다.
+    </div>
+</sec:authorize>
 
 <script>
 async function getRecommendation() {

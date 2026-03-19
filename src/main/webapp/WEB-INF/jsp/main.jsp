@@ -22,7 +22,6 @@
         <!-- 오른쪽 예약 현황 섹션 -->
         <section class="status-section">
             <div class="login-container">
-                <h1>로그인</h1>
                 <jsp:include page="login.jsp" />
             </div>
 
@@ -30,11 +29,12 @@
 
         	<h1>예약 현황 목록</h1>
             <jsp:include page="listReserve.jsp" />
-            
-            <h1>예약 현황 차트</h1>
-            <jsp:include page="chartReserve.jsp" />
+
+            <sec:authorize access="hasRole('ADMIN')">
+                <h1>예약 현황 차트 (관리자 전용)</h1>
+                <jsp:include page="chartReserve.jsp" />
+            </sec:authorize>
         </section>
-        
     </main>
 </body>
 </html>

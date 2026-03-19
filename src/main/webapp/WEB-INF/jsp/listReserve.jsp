@@ -4,6 +4,7 @@
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.format.TextStyle" %>
 <%@ page import="com.example.studyroom_reservation_recommendation.entity.Reservation" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%
     List<Reservation> list = (List<Reservation>) request.getAttribute("list");
     String keyword = (String) request.getAttribute("searchKeyword");
@@ -12,16 +13,21 @@
 
 <div class="list-header">
     <button type="button" class="delete-btn" onclick="submitDeleteForm()">삭제</button>
-	<form action="<%= request.getContextPath() %>/reserve" method="GET" class="search-form">
-        <input type="hidden" name="action" value="search">
-        <div class="search-box">
-            <input type="text" name="keyword" value="<%=keyword%>" placeholder="이름/학번 검색">
-            <button type="submit" class="search-btn">🔍</button>
-        </div>
-    </form>
+
+	<%-- 검색은 관리자 전용 --%>
+	<sec:authorize access="hasRole('ADMIN')">
+        <form action="<%= request.getContextPath() %>/reserve" method="GET" class="search-form">
+            <input type="hidden" name="action" value="search">
+            <div class="search-box">
+                <input type="text" name="keyword" value="<%=keyword%>" placeholder="이름/학번 검색">
+                <button type="submit" class="search-btn">🔍</button>
+            </div>
+        </form>
+    </sec:authorize>
 </div>
 
-<form id="deleteForm" action="<%= request.getContextPath() %>/reserve" method="POST">
+
+<form id="deleteForm" action="<%= request.getContextPath() %>/delete" method="POST">
     <input type="hidden" name="action" value="delete">
 		
 	<table class="status-table">
