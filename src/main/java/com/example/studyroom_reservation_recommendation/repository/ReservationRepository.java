@@ -10,8 +10,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDateAndTimeSlot(String date, String timeslot);
 
     // 목록 조회
-    List<Reservation> findAllByOrderByDateAscTimeSlotAsc();
-    
+    List<Reservation> findAllOrderByDateAscTimeSlotAsc();
+    // 학번으로 개인 목록 조회
+    List<Reservation> findByStudentIdOrderByDateAscTimeSlotAsc(String studentId);
+
     // 검색
     List<Reservation> findByNameContainingOrStudentIdContainingOrderByDateAscTimeSlotAsc(String name, String studentId);
 

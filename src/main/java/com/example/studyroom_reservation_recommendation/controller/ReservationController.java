@@ -4,6 +4,7 @@ import com.example.studyroom_reservation_recommendation.entity.Reservation;
 import com.example.studyroom_reservation_recommendation.repository.ReservationRepository;
 import com.example.studyroom_reservation_recommendation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,15 +23,24 @@ public class ReservationController {
     @GetMapping
     public String mainPage(@RequestParam(required = false) String keyword,
                            @RequestParam(required = false) String action,
-                           Model model) {
+                           Model model,
+                           Authentication authentication) {
         List<Reservation> list;
+        String username = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         // 검색어가 있으면 검색, 없으면 전체 조회
         if (keyword != null && !keyword.trim().isEmpty()) {
             list = reservationService.searchReservations(keyword.trim());
             model.addAttribute("searchKeyword", keyword); // 검색어 유지
         } else {
-            list = reservationService.getAllReservations();
+            // 관리자 로그인이면 전체 목록, 아니면 개인 목록 조회
+            if (isAdmin) {
+                list = reservationService.getAllReservations();
+            } else {
+                list = reservationService.getStudentIdReservations(authentication.getName());
+            }
         }
         model.addAttribute("list", list);
 
