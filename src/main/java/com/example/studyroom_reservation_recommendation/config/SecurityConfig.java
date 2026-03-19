@@ -1,5 +1,6 @@
 package com.example.studyroom_reservation_recommendation.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,8 +22,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                    // JSP forward / error dispatch는 인증 없이 통과시켜야 로그인 페이지가 렌더링됨
+                    .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR, DispatcherType.INCLUDE).permitAll()
                     // 1. 누구나 접근 가능한 경로 (로그인 폼이 있는 메인 페이지 포함)
-                    .requestMatchers("/", "/login", "/api/recommend", "/static/**", "/css/**", "/js/**").permitAll()
+                    .requestMatchers("/", "/login", "/error", "/api/recommend", "/static/**", "/css/**", "/js/**").permitAll()
                     // 2. 관리자 전용 경로
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     // 3. 나머지는 로그인한 유저만 (예: /reserve 등록 등)
