@@ -1,10 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%
-    if (request.getAttribute("list") == null) {
-        response.sendRedirect(request.getContextPath() + "/reserve?action=main");
-        return;
-    }
-%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -25,6 +21,13 @@
 
         <!-- 오른쪽 예약 현황 섹션 -->
         <section class="status-section">
+            <div class="login-container">
+                <h1>로그인</h1>
+                <jsp:include page="login.jsp" />
+            </div>
+
+            <hr class="section-divider">
+
         	<h1>예약 현황 목록</h1>
             <jsp:include page="listReserve.jsp" />
             

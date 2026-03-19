@@ -164,6 +164,50 @@ body {
 }
 
 
+/* 로그인 설정 컨테이너 */
+.login-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+.auth-box {
+    text-align: center;
+}
+/* 로그인 폼 및 정보 정렬 */
+.auth-form, .auth-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* 요소 간 간격 */
+}
+/* 입력창 스타일 */
+.login-form, .welcome-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+.auth-input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 140px;
+}
+.auth-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.login-btn { background-color: #007bff; color: white; }
+.logout-btn { background-color: #ff4d4d; color: white; margin-left: 10px; }
+
+.welcome-text { font-size: 1rem; color: #555; }
+.section-divider { border: 0; height: 1px; background: #eee; margin: 20px 0; }
+
+
 .list-header {
     width: 100%;
     max-width: 1000px;
